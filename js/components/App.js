@@ -1,34 +1,43 @@
 import React from 'react';
 import Relay from 'react-relay';
 
-class App extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>Widget list</h1>
-        <ul>
-          {this.props.viewer.widgets.edges.map(edge =>
-            <li key={edge.node.id}>{edge.node.name} (ID: {edge.node.id})</li>
-          )}
-        </ul>
-      </div>
-    );
-  }
+class Tea extends React.Component {
+    render() {
+        var {name, steepingTime} = this.props.tea;
+        return (
+            <li key={name}>
+                {name} (<em>{steepingTime} min</em>)
+            </li>
+        );
+    }
 }
-
-export default Relay.createContainer(App, {
-  fragments: {
-    viewer: () => Relay.QL`
-      fragment on User {
-        widgets(first: 10) {
-          edges {
-            node {
-              id,
-              name,
-            },
-          },
-        },
-      }
-    `,
-  },
+Tea = Relay.createContainer(Tea, {
+    fragments: {
+        tea: () => Relay.QL`
+            fragment on Tea {
+                name,
+                steepingTime,
+            }
+        `,
+    },
 });
+
+class TeaStore extends React.Component {
+    render() {
+        return <ul>
+            {this.props.store.teas.map(
+                tea => <Tea tea={tea}/>
+            )}
+        </ul>;
+    }
+}
+export default Relay.createContainer(TeaStore, {
+    fragments: {
+        store: () => Relay.QL`
+            fragment on Store {
+                teas { ${Tea.getFragment('tea')} },
+            }
+        `,
+    },
+});
+
